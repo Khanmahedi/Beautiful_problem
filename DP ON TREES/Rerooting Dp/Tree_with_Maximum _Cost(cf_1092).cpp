@@ -14,27 +14,32 @@ const ll int INF = 9223372036854775807 , nmax = 2501 , block = 350 , N = 3e6+20 
 #endif
 
 vector < ll > ad[N] ;
-ll a[N] , dp[N] ;
+ll a[N] , dp[N] , res[N] , sum[N] , s = 0  ;
 void dfs(ll node, ll par){
   for(auto it: ad[node]){
     if(par != it){
       dfs(it, node) ;
     }
   }
+  sum[par]+=(sum[node] + a[node]) ;
   if(par != -1)
-  dp[par] = dp[par] + max(dp[node], 0ll) ;
+  dp[par]+=dp[node]+(sum[node] + a[node]) ;
 }
 
 void dfs1(ll node, ll par){
-    ll val ;
-    if(par != -1) val = dp[par] - max(dp[node], 0ll) ;
-    if(node != 1){
-      dp[node] = max(dp[node],dp[node] + val) ;
-    }
+    res[node] = dp[node] ;
   for(auto it: ad[node]){
-    if(par != it)
+     if(it == par) continue ;
+     dp[node]-=(dp[it]+a[it]+sum[it]) ;
+     s+=(sum[node] - sum[it] - a[it]) ;
+     s+=a[node] ;
+     debug(it, s, dp[node]) ;
+     dp[it]+=(s+dp[node]);
      dfs1(it, node) ;
-
+     dp[it]-=(s+dp[node]) ;
+     s-=a[node] ;
+     s-=(sum[node] - sum[it] - a[it]) ;
+     dp[node]+=(dp[it]+a[it]+sum[it]) ;
   }
 
 
@@ -44,13 +49,13 @@ void dfs1(ll node, ll par){
 
 int main(){
   FastIo ;
-  
+
   ll n , m ;
   cin >> n ;
   for( ll i = 1 ; i <= n  ;  i++){
     ll x ;
     cin >> x ;
-    dp[i] = (x == 0)?-1:1 ;
+    a[i] = x; 
   }
   for( ll i = 0 ; i < n -1 ; i++){
     ll x , y ;
@@ -62,10 +67,12 @@ int main(){
   dfs(1, -1) ;
   dfs1(1, -1) ;
 
-  for( ll i = 1 ; i <= n ; i++) cout << dp[i] << " " ;
-    cout << endl ;
+  ll ans = 0 ;
 
- 
+  for( ll i = 1 ; i <= n ; i++)
+   ans = max(ans, res[i]) ;
+
+  cout << ans << endl ;
 
   }
 
